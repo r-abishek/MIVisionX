@@ -93,7 +93,7 @@ std::pair<void*, void*> RingBuffer::get_box_encode_write_buffers()
     block_if_full();
     if((_mem_type == RocalMemType::OCL) || (_mem_type == RocalMemType::HIP))
         return std::make_pair(_dev_bbox_buffer[_write_ptr], _dev_labels_buffer[_write_ptr]);
-    return std::make_pair(nullptr, nullptr); 
+    return std::make_pair(nullptr, nullptr);
 }
 void RingBuffer::unblock_reader()
 {
@@ -119,7 +119,7 @@ void RingBuffer::unblock_writer()
     _wait_for_unload.notify_all();
 }
 
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 void RingBuffer::init(RocalMemType mem_type, DeviceResources dev, unsigned sub_buffer_size, unsigned sub_buffer_count)
 {
     _mem_type = mem_type;
@@ -173,7 +173,7 @@ void RingBuffer::init(RocalMemType mem_type, DeviceResources dev, unsigned sub_b
     }
 }
 
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
 void RingBuffer::initHip(RocalMemType mem_type, DeviceResourcesHip dev, unsigned sub_buffer_size, unsigned sub_buffer_count)
 {
     _mem_type = mem_type;
@@ -221,12 +221,37 @@ void RingBuffer::initHip(RocalMemType mem_type, DeviceResourcesHip dev, unsigned
         }
     }
 }
+
+#else
+void RingBuffer::init(RocalMemType mem_type, unsigned sub_buffer_size, unsigned sub_buffer_count)
+{
+    _mem_type = mem_type;
+    _sub_buffer_size = sub_buffer_size;
+    _sub_buffer_count = sub_buffer_count;
+    if(BUFF_DEPTH < 2)
+        THROW ("Error internal buffer size for the ring buffer should be greater than one")
+
+    // Allocating buffers
+    if(mem_type== RocalMemType::HOST)
+    {
+        _host_sub_buffers.resize(BUFF_DEPTH);
+        for(size_t buffIdx = 0; buffIdx < BUFF_DEPTH; buffIdx++)
+        {
+            const size_t master_buffer_size = sub_buffer_size * sub_buffer_count;
+            // a minimum of extra MEM_ALIGNMENT is allocated
+            _host_master_buffers[buffIdx] = aligned_alloc(MEM_ALIGNMENT, MEM_ALIGNMENT * (master_buffer_size / MEM_ALIGNMENT + 1));
+            _host_sub_buffers[buffIdx].resize(_sub_buffer_count);
+            for(size_t sub_buff_idx = 0; sub_buff_idx < _sub_buffer_count; sub_buff_idx++)
+                _host_sub_buffers[buffIdx][sub_buff_idx] = (unsigned char*)_host_master_buffers[buffIdx] + _sub_buffer_size * sub_buff_idx;
+        }
+    }
+}
 #endif
 
 
 void RingBuffer::initBoxEncoderMetaData(RocalMemType mem_type, size_t encoded_bbox_size, size_t encoded_labels_size)
 {
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     if(_mem_type == RocalMemType::HIP)
     {
         if(_devhip.hip_stream == nullptr || _devhip.device_id == -1 )
@@ -248,7 +273,7 @@ void RingBuffer::initBoxEncoderMetaData(RocalMemType mem_type, size_t encoded_bb
             }
         }
     }
-#else
+#elseif (!ENABLE_HIP && ENABLE_OPENCL)
     if(mem_type== RocalMemType::OCL)
     {
         if(_dev.cmd_queue == nullptr || _dev.device_id == nullptr || _dev.context == nullptr)
@@ -271,7 +296,8 @@ void RingBuffer::initBoxEncoderMetaData(RocalMemType mem_type, size_t encoded_bb
             }
         }
     }
-   else
+#else
+    if(mem_type== RocalMemType::HOST)
     {
         //todo:: for host
     }
@@ -394,4 +420,3 @@ MetaDataNamePair& RingBuffer::get_meta_data()
         THROW("ring buffer internals error, image and metadata sizes not the same "+TOSTR(_level) + " != "+TOSTR(_meta_ring_buffer.size()))
     return  _meta_ring_buffer.front();
 }
-

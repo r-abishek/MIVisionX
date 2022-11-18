@@ -31,9 +31,9 @@ THE SOFTWARE.
 class VideoLoaderSharded : public VideoLoaderModule
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     explicit VideoLoaderSharded(DeviceResourcesHip dev_resources);
-#else
+#elseif (!ENABLE_HIP)
     explicit VideoLoaderSharded(DeviceResources dev_resources);
 #endif
     ~VideoLoaderSharded() override;
@@ -52,9 +52,9 @@ public:
     Timing timing() override;
 private:
     void increment_loader_idx();
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     const DeviceResourcesHip _dev_resources;
-#else
+#elseif (!ENABLE_HIP)
     const DeviceResources _dev_resources;
 #endif
     bool _initialized = false;

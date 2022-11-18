@@ -147,10 +147,10 @@ struct Image
     void* buffer() { return _mem_handle; }
     vx_image handle() { return vx_handle; }
     vx_context context() { return _context; }
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
     unsigned copy_data(cl_command_queue queue, unsigned char* user_buffer, bool sync);
     unsigned copy_data(cl_command_queue queue, cl_mem user_buffer, bool sync);
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
     unsigned copy_data(hipStream_t stream, unsigned char* user_buffer, bool sync);
     unsigned copy_data(hipStream_t stream, void* hip_memory, bool sync);
 #endif
@@ -175,6 +175,3 @@ private:
     ImageInfo _info;//!< The structure holding the info related to the stored OpenVX image
     vx_context _context = nullptr;
 };
-
-
-

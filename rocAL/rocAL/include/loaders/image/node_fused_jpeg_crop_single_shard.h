@@ -29,9 +29,9 @@ THE SOFTWARE.
 class FusedJpegCropSingleShardNode: public Node
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     FusedJpegCropSingleShardNode(Image *output, DeviceResourcesHip device_resources);
-#else
+#elseif (!ENABLE_HIP)
     FusedJpegCropSingleShardNode(Image *output, DeviceResources device_resources);
 #endif
     ~FusedJpegCropSingleShardNode() override;

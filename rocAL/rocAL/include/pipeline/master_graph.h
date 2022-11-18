@@ -140,12 +140,12 @@ private:
     std::list<std::shared_ptr<Node>> _root_nodes;//!< List of all root nodes (image/video loaders)
     std::list<std::shared_ptr<Node>> _meta_data_nodes;//!< List of nodes where meta data has to be updated after augmentation
     std::map<Image*, std::shared_ptr<Node>> _image_map;//!< key: image, value : Parent node
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     void * _output_tensor;//!< In the GPU processing case , is used to convert the U8 samples to float32 before they are being transfered back to host
-    DeviceManagerHip   _device;//!< Keeps the device related constructs needed for running on GPU
-#else
+    DeviceManagerHip _device;//!< Keeps the device related constructs needed for running on GPU
+#elseif (!ENABLE_HIP)
     void* _output_tensor;//!< In the GPU processing case , is used to convert the U8 samples to float32 before they are being transfered back to host
-    DeviceManager   _device;//!< Keeps the device related constructs needed for running on GPU
+    DeviceManager _device;//!< Keeps the device related constructs needed for running on GPU
 #endif
     std::shared_ptr<Graph> _graph = nullptr;
     RocalAffinity _affinity;

@@ -34,9 +34,9 @@ THE SOFTWARE.
 // it uses a circular buffer to store decoded frames and images for the user
 class ImageLoader : public LoaderModule {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     explicit ImageLoader(DeviceResourcesHip dev_resources);
-#else
+#elseif (!ENABLE_HIP)
     explicit ImageLoader(DeviceResources dev_resources);
 #endif
     ~ImageLoader() override;
@@ -89,4 +89,3 @@ private:
     bool _decoder_keep_original = false;
     int _device_id;
 };
-

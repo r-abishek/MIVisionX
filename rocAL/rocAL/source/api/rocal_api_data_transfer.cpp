@@ -23,7 +23,7 @@ THE SOFTWARE.
 #include "commons.h"
 #include "context.h"
 #include "rocal_api.h"
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 #include "CL/cl.h"
 #endif
 
@@ -146,5 +146,3 @@ ROCAL_API_CALL rocalSetOutputs(RocalContext p_context, unsigned int num_of_outpu
         context->master_graph->set_output(img);
     }
 }
-
-

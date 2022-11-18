@@ -27,6 +27,8 @@ if(WIN32)
 endif()
 find_package(OpenCV QUIET)
 find_package(AMDRPP QUIET)
+
+# miopen
 if(GPU_SUPPORT)
     if("${BACKEND}" STREQUAL "OPENCL")
         find_package(OpenCL QUIET)
@@ -72,6 +74,7 @@ if(GPU_SUPPORT)
     endif()
 endif()
 
+# amd_media, amd_loomsl and amd_custom
 if(GPU_SUPPORT)
     find_package(FFmpeg QUIET)
     if(FFMPEG_FOUND)
@@ -97,6 +100,7 @@ if(GPU_SUPPORT)
     endif()
 endif(GPU_SUPPORT)
 
+# amd_nn
 if (NEURAL_NET)
     if(GPU_SUPPORT AND miopen_FOUND)
         if ("${BACKEND}" STREQUAL "OPENCL" AND OpenCL_FOUND AND miopengemm_FOUND)
@@ -123,6 +127,7 @@ else()
     message("-- ${Cyan}Neural Net Modules turned OFF by user option -D NEURAL_NET=OFF ${ColourReset}")
 endif()
 
+# amd_rpp
 if(AMDRPP_FOUND AND GPU_SUPPORT)
     #find the RPP backend type
     set(RPP_BACKEND_OPENCL_FOUND 0)
@@ -155,11 +160,13 @@ if(AMDRPP_FOUND AND GPU_SUPPORT)
         message("-- ${Red}WARNING: GPU support with OpenCL or HIP Not Found -- amd_rpp module excluded${ColourReset}")
     endif()
 elseif(AMDRPP_FOUND AND "${BACKEND}" STREQUAL "CPU")
-    message("-- ${Red}WARNING: AMDRPP Found -- amd_rpp module excluded with CPU Only Backend${ColourReset}")
+    add_subdirectory(amd_rpp)
+    message("-- ${Red}WARNING: AMDRPP Found -- amd_rpp module building with CPU backend${ColourReset}")
 else()
     message("-- ${Red}WARNING: AMDRPP Not Found -- amd_rpp module excluded${ColourReset}")
 endif()
 
+# amd_opencv
 if(OpenCV_FOUND)
     if(${OpenCV_VERSION_MAJOR} EQUAL 3 OR ${OpenCV_VERSION_MAJOR} EQUAL 4)
         message("-- ${White}OpenCV Found -- Version-${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}.X${ColourReset}")
@@ -172,6 +179,7 @@ else()
     message("-- ${Red}WARNING: OpenCV Not Found -- amd_opencv module excluded${ColourReset}")
 endif()
 
+# amd_migraphx
 if (MIGRAPHX)
     if(GPU_SUPPORT)
         if("${BACKEND}" STREQUAL "HIP" AND HIP_FOUND)

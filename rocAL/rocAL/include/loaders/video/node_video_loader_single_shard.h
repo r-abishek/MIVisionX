@@ -30,9 +30,9 @@ THE SOFTWARE.
 class VideoLoaderSingleShardNode : public Node
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     VideoLoaderSingleShardNode(Image *output, DeviceResourcesHip device_resources);
-#else
+#elseif (!ENABLE_HIP)
     VideoLoaderSingleShardNode(Image *output, DeviceResources device_resources);
 #endif
     ~VideoLoaderSingleShardNode() override;

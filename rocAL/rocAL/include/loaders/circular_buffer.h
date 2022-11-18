@@ -23,7 +23,7 @@ THE SOFTWARE.
 #pragma once
 #include <vector>
 #include <condition_variable>
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
     #include <CL/cl.h>
 #endif
 #include <queue>
@@ -47,9 +47,9 @@ struct crop_image_info
 class CircularBuffer
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     CircularBuffer(DeviceResourcesHip hipres);
-#else
+#elseif (!ENABLE_HIP && ENABLE_OPENCL)
     CircularBuffer(DeviceResources ocl);
 #endif
     ~CircularBuffer();
@@ -88,11 +88,11 @@ private:
      *  Pinned memory allocated on the host used for fast host to device memory transactions,
      *  or the regular host memory buffers in the host processing case.
      */
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
     cl_command_queue _cl_cmdq = nullptr;
     cl_context _cl_context = nullptr;
     cl_device_id _device_id = nullptr;
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
     hipStream_t _hip_stream;
     int _hip_device_id, _hip_canMapHostMemory;
 #endif

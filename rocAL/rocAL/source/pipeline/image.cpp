@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include <cstdio>
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 #include <CL/cl.h>
 #endif
 #include <vx_ext_amd.h>
@@ -287,7 +287,7 @@ int Image::create(vx_context context)
     return 0;
 }
 
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 unsigned Image::copy_data(cl_command_queue queue, unsigned char* user_buffer, bool sync)
 {
     if(_info._type != ImageInfo::Type::HANDLE)
@@ -321,7 +321,7 @@ unsigned Image::copy_data(cl_command_queue queue, cl_mem user_buffer, bool sync)
 {
     return 0;
 }
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
 unsigned Image::copy_data(hipStream_t stream, unsigned char* user_buffer, bool sync)
 {
     if(_info._type != ImageInfo::Type::HANDLE)

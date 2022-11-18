@@ -30,9 +30,9 @@ THE SOFTWARE.
 class CIFAR10DataLoader : public LoaderModule
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     explicit CIFAR10DataLoader(DeviceResourcesHip dev_resources);
-#else
+#elseif (!ENABLE_HIP)
     explicit CIFAR10DataLoader(DeviceResources dev_resources);
 #endif
     ~CIFAR10DataLoader() override;
@@ -58,9 +58,9 @@ private:
     LoaderModuleStatus update_output_image();
     LoaderModuleStatus load_routine();
     std::shared_ptr<Reader> _reader;
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     const DeviceResourcesHip _dev_resources;
-#else
+#elseif (!ENABLE_HIP)
     const DeviceResources _dev_resources;
 #endif
     decoded_image_info _raw_img_info;       // image info to store the names. In this case the ID of image is stored in _roi_width field
