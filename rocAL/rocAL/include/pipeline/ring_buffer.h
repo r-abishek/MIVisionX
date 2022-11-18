@@ -47,8 +47,10 @@ public:
     ///\param sub_buffer_count
 #if (ENABLE_HIP && !ENABLE_OPENCL)
     void initHip(RocalMemType mem_type, DeviceResourcesHip dev, unsigned sub_buffer_size, unsigned sub_buffer_count);
-#elseif (!ENABLE_HIP)
+#elseif (!ENABLE_HIP && ENABLE_OPENCL)
     void init(RocalMemType mem_type, DeviceResources dev, unsigned sub_buffer_size, unsigned sub_buffer_count);
+#else
+    void init(RocalMemType mem_type, unsigned sub_buffer_size, unsigned sub_buffer_count);
 #endif
     void initBoxEncoderMetaData(RocalMemType mem_type, size_t encoded_bbox_size, size_t encoded_labels_size);
     void release_gpu_res();
