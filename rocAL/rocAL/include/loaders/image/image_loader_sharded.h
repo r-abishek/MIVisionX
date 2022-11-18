@@ -30,9 +30,9 @@ THE SOFTWARE.
 class ImageLoaderSharded : public LoaderModule
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     explicit ImageLoaderSharded(DeviceResourcesHip dev_resources);
-#else
+#elseif (!ENABLE_HIP)
     explicit ImageLoaderSharded(DeviceResources dev_resources);
 #endif
     ~ImageLoaderSharded() override;
@@ -51,9 +51,9 @@ public:
     void shut_down() override;
 private:
     void increment_loader_idx();
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     const DeviceResourcesHip _dev_resources;
-#else
+#elseif (!ENABLE_HIP)
     const DeviceResources _dev_resources;
 #endif
     bool _initialized = false;

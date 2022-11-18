@@ -37,9 +37,9 @@ THE SOFTWARE.
 class VideoLoader : public VideoLoaderModule
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     explicit VideoLoader(DeviceResourcesHip dev_resources);
-#else
+#elseif (!ENABLE_HIP)
     explicit VideoLoader(DeviceResources dev_resources);
 #endif
     ~VideoLoader() override;

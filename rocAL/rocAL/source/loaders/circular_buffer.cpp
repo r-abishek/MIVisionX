@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 #include "circular_buffer.h"
 #include "log.h"
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 CircularBuffer::CircularBuffer(DeviceResources ocl):
         _cl_cmdq(ocl.cmd_queue),
         _cl_context(ocl.context),
@@ -33,7 +33,7 @@ CircularBuffer::CircularBuffer(DeviceResources ocl):
 {
 
 }
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
 CircularBuffer::CircularBuffer(DeviceResourcesHip hipres):
         _hip_stream(hipres.hip_stream),
         _hip_device_id(hipres.device_id),
@@ -102,7 +102,7 @@ void CircularBuffer::sync()
 {
     if(!_initialized)
         return;
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
     cl_int err = CL_SUCCESS;
     if(_output_mem_type== RocalMemType::OCL)
     {
@@ -128,7 +128,7 @@ void CircularBuffer::sync()
 
     #endif
     }
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
     else if (_output_mem_type== RocalMemType::HIP){
         // copy memory to host only if needed
         if (!_hip_canMapHostMemory) {
@@ -185,7 +185,7 @@ void CircularBuffer::init(RocalMemType output_mem_type, size_t output_mem_size, 
         THROW ("Error internal buffer size for the circular buffer should be greater than one")
 
     // Allocating buffers
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
     if(_output_mem_type== RocalMemType::OCL)
     {
         if(_cl_cmdq == nullptr || _device_id == nullptr || _cl_context == nullptr)
@@ -217,7 +217,7 @@ void CircularBuffer::init(RocalMemType output_mem_type, size_t output_mem_size, 
             clRetainMemObject((cl_mem)_dev_buffer[buffIdx]);
         }
     }
-#else
+#elseif (ENABLE_HIP && !ENABLE_OPENCL)
     if(_output_mem_type== RocalMemType::HIP)
     {
         if(!_hip_stream  || _hip_device_id == -1 )

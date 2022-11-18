@@ -28,9 +28,9 @@ THE SOFTWARE.
 class ImageLoaderSingleShardNode : public Node
 {
 public:
-#if ENABLE_HIP
+#if (ENABLE_HIP && !ENABLE_OPENCL)
     ImageLoaderSingleShardNode(Image *output, DeviceResourcesHip device_resources);
-#else
+#elseif (!ENABLE_HIP)
     ImageLoaderSingleShardNode(Image *output, DeviceResources device_resources);
 #endif
     ~ImageLoaderSingleShardNode() override;

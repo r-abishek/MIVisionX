@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-#if !ENABLE_HIP
+#if (!ENABLE_HIP && ENABLE_OPENCL)
 #include <CL/cl.h>
 #endif
 #include <vx_ext_amd.h>
@@ -793,7 +793,7 @@ MasterGraph::copy_out_tensor(void *out_ptr, RocalTensorFormat format, float mult
     #endif
                         }
                     }
-                    else if(output_data_type == RocalTensorDataType::FP16) 
+                    else if(output_data_type == RocalTensorDataType::FP16)
                     {
                         half *output_tensor_16 = static_cast<half *>(out_ptr);
                         auto channel_size = w * h;
